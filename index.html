@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>경로 테스트</title>
+  <title>좌표 기반 경로 테스트</title>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8swteRAgf-r_tS_uncv_IWJKcGghanrY&libraries=geometry"></script>
   <style>
     body { margin:0; padding:0; }
@@ -18,8 +18,10 @@
 </head>
 <body>
   <div id="panel">
-    <input id="start" type="text" value="서울역" placeholder="출발지">
-    <input id="end" type="text" value="강남역" placeholder="도착지">
+    <input id="startLat" type="text" value="37.556" placeholder="출발 위도">
+    <input id="startLng" type="text" value="126.972" placeholder="출발 경도">
+    <input id="endLat" type="text" value="37.497" placeholder="도착 위도">
+    <input id="endLng" type="text" value="127.027" placeholder="도착 경도">
     <button id="routeBtn" disabled>경로 보기</button>
   </div>
   <div id="map"></div>
@@ -30,7 +32,7 @@
 
     function initMap() {
       map = new google.maps.Map(document.getElementById("map"), {
-        center: {lat: 37.5665, lng: 126.9780},
+        center: {lat: 37.556, lng: 126.972},
         zoom: 13
       });
       directionsService = new google.maps.DirectionsService();
@@ -49,8 +51,14 @@
       polylines.forEach(p => p.setMap(null));
       polylines = [];
 
-      const start = document.getElementById("start").value;
-      const end = document.getElementById("end").value;
+      const start = {
+        lat: parseFloat(document.getElementById("startLat").value),
+        lng: parseFloat(document.getElementById("startLng").value)
+      };
+      const end = {
+        lat: parseFloat(document.getElementById("endLat").value),
+        lng: parseFloat(document.getElementById("endLng").value)
+      };
 
       directionsService.route({
         origin: start,
