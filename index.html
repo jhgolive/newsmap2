@@ -1,1 +1,77 @@
-﻿
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>경로 테스트</title>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8swteRAgf-r_tS_uncv_IWJKcGghanrY&libraries=geometry"></script>
+  <style>
+    body { margin:0; padding:0; }
+    #map { width:100vw; height:100vh; }
+    #panel {
+      position:absolute; top:10px; left:50%; transform:translateX(-50%);
+      background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.3);
+      display:flex; gap:5px;
+    }
+    input { padding:5px; width:160px; }
+    button { padding:5px 10px; }
+  </style>
+</head>
+<body>
+  <div id="panel">
+    <input id="start" type="text" value="서울역" placeholder="출발지">
+    <input id="end" type="text" value="강남역" placeholder="도착지">
+    <button onclick="calcRoute()">경로 보기</button>
+  </div>
+  <div id="map"></div>
+
+  <script>
+    let map, directionsService;
+    let polylines = [];
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: {lat: 37.5665, lng: 126.9780}, // 서울 중심
+        zoom: 13
+      });
+      directionsService = new google.maps.DirectionsService();
+    }
+
+    function calcRoute() {
+      // 기존 선 제거
+      polylines.forEach(p => p.setMap(null));
+      polylines = [];
+
+      const start = document.getElementById("start").value;
+      const end = document.getElementById("end").value;
+
+      directionsService.route({
+        origin: start,
+        destination: end,
+        travelMode: google.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: true
+      }, (result, status) => {
+        if (status === "OK") {
+          result.routes.forEach((route, idx) => {
+            const color = ["blue","green","red","orange"][idx % 4];
+            const polyline = new google.maps.Polyline({
+              path: route.overview_path,
+              strokeColor: color,
+              strokeOpacity: 0.8,
+              strokeWeight: 5,
+              map: map
+            });
+            polylines.push(polyline);
+
+            // 요약 콘솔 출력
+            console.log(`routes[${idx}]`, route.summary, route.legs[0].distance.text, route.legs[0].duration.text);
+          });
+        } else {
+          alert("경로를 불러올 수 없음: " + status);
+        }
+      });
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
