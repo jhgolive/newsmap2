@@ -63,7 +63,7 @@
       directionsService.route({
         origin: start,
         destination: end,
-        travelMode: google.maps.TravelMode.DRIVING,
+        travelMode: google.maps.TravelMode.TRANSIT,
         provideRouteAlternatives: true
       }, (result, status) => {
         if (status === "OK") {
