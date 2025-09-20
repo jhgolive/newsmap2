@@ -1,96 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <title>좌표 기반 경로 테스트</title>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8swteRAgf-r_tS_uncv_IWJKcGghanrY&libraries=geometry"></script>
+  <meta charset="UTF-8">
+  <title>Controller</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    body { margin:0; padding:0; }
-    #map { width:100vw; height:100vh; }
-    #panel {
-      position:absolute; top:10px; left:50%; transform:translateX(-50%);
-      background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.3);
-      display:flex; gap:5px; z-index:5;
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #222;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      touch-action: none;
     }
-    input { padding:5px; width:160px; }
-    button { padding:5px 10px; }
   </style>
 </head>
 <body>
-  <div id="panel">
-    <input id="startLat" type="text" value="37.556" placeholder="출발 위도">
-    <input id="startLng" type="text" value="126.972" placeholder="출발 경도">
-    <input id="endLat" type="text" value="37.497" placeholder="도착 위도">
-    <input id="endLng" type="text" value="127.027" placeholder="도착 경도">
-    <button id="routeBtn" disabled>경로 보기</button>
-  </div>
-  <div id="map"></div>
+  <h2>📲 터치해서 마우스 조종</h2>
 
   <script>
-    let map, directionsService;
-    let polylines = [];
-
-    function initMap() {
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: {lat: 37.556, lng: 126.972},
-        zoom: 13
-      });
-      directionsService = new google.maps.DirectionsService();
-
-      // 버튼 활성화
-      document.getElementById("routeBtn").disabled = false;
-    }
-
-    function calcRoute() {
-      if(!directionsService) {
-        alert("DirectionsService가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.");
-        return;
-      }
-
-      // 기존 Polyline 제거
-      polylines.forEach(p => p.setMap(null));
-      polylines = [];
-
-      const start = {
-        lat: parseFloat(document.getElementById("startLat").value),
-        lng: parseFloat(document.getElementById("startLng").value)
-      };
-      const end = {
-        lat: parseFloat(document.getElementById("endLat").value),
-        lng: parseFloat(document.getElementById("endLng").value)
-      };
-
-      directionsService.route({
-        origin: start,
-        destination: end,
-        travelMode: google.maps.TravelMode.TRANSIT,
-        provideRouteAlternatives: true
-      }, (result, status) => {
-        if (status === "OK") {
-          result.routes.forEach((route, idx) => {
-            const color = ["blue","green","red","orange"][idx % 4];
-            const polyline = new google.maps.Polyline({
-              path: route.overview_path,
-              strokeColor: color,
-              strokeOpacity: 0.8,
-              strokeWeight: 5,
-              map: map
-            });
-            polylines.push(polyline);
-
-            // 요약 콘솔 출력
-            console.log(`routes[${idx}]`, route.summary, route.legs[0].distance.text, route.legs[0].duration.text);
-          });
-        } else {
-          alert("경로를 불러올 수 없음: " + status);
-        }
-      });
-    }
-
-    window.onload = () => {
-      initMap();
-      document.getElementById("routeBtn").addEventListener("click", calcRoute);
+    // 🔹 Firebase 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQGtOEcxFxl9FV7NASLgxLDc23u2vzS_0",
+      authDomain: "mygps-11798.firebaseapp.com",
+      databaseURL: "https://mygps-11798-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "mygps-11798",
+      storageBucket: "mygps-11798.firebasestorage.app",
+      messagingSenderId: "271371741627",
+      appId: "1:271371741627:web:642901f43c5ad57d80bc9e"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const pointerRef = db.ref('pointer');
+
+    // 🔹 좌표 전송 함수
+    function sendPointer(x, y, click=false) {
+      pointerRef.set({
+        x, y, click,
+        timestamp: Date.now()
+      });
+    }
+
+    // 🔹 터치 이동
+    document.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      const x = t.clientX / window.innerWidth;
+      const y = t.clientY / window.innerHeight;
+      sendPointer(x, y, false);
+    });
+
+    // 🔹 터치 클릭
+    document.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      const x = t.clientX / window.innerWidth;
+      const y = t.clientY / window.innerHeight;
+      sendPointer(x, y, true);
+    });
   </script>
 </body>
 </html>
