@@ -16,11 +16,12 @@
       align-items: center;
       user-select: none;
       touch-action: none;
+      cursor: crosshair; /* 데스크톱에서 포인터 느낌 */
     }
   </style>
 </head>
 <body>
-  <h2>📲 화면 터치로 마우스 조종</h2>
+  <h2>📲 화면 터치/마우스로 마우스 조종</h2>
 
   <script>
     // 🔹 Firebase 설정
@@ -57,19 +58,29 @@
       }
     }
 
-    // 🔹 터치 이동 이벤트
+    // 🔹 모바일 터치 이벤트
     document.addEventListener('touchmove', (e) => {
       const t = e.touches[0];
       const x = t.clientX / window.innerWidth;
       const y = t.clientY / window.innerHeight;
       throttledSend(x, y, false);
     });
-
-    // 🔹 터치 클릭 이벤트 (즉시 전송)
     document.addEventListener('touchstart', (e) => {
       const t = e.touches[0];
       const x = t.clientX / window.innerWidth;
       const y = t.clientY / window.innerHeight;
+      sendPointer(x, y, true);
+    });
+
+    // 🔹 데스크톱 마우스 이벤트
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      throttledSend(x, y, false);
+    });
+    document.addEventListener('mousedown', (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
       sendPointer(x, y, true);
     });
   </script>
