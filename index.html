@@ -20,7 +20,7 @@
   </style>
 </head>
 <body>
-  <h2>📲 터치해서 마우스 조종</h2>
+  <h2>📲 화면 터치로 마우스 조종</h2>
 
   <script>
     // 🔹 Firebase 설정
@@ -45,15 +45,27 @@
       });
     }
 
-    // 🔹 터치 이동
+    // 🔹 Throttling: 1초에 최대 3번
+    let lastSent = 0;
+    const throttleDelay = 333; // ms
+
+    function throttledSend(x, y, click=false) {
+      const now = Date.now();
+      if (now - lastSent > throttleDelay) {
+        sendPointer(x, y, click);
+        lastSent = now;
+      }
+    }
+
+    // 🔹 터치 이동 이벤트
     document.addEventListener('touchmove', (e) => {
       const t = e.touches[0];
       const x = t.clientX / window.innerWidth;
       const y = t.clientY / window.innerHeight;
-      sendPointer(x, y, false);
+      throttledSend(x, y, false);
     });
 
-    // 🔹 터치 클릭
+    // 🔹 터치 클릭 이벤트 (즉시 전송)
     document.addEventListener('touchstart', (e) => {
       const t = e.touches[0];
       const x = t.clientX / window.innerWidth;
