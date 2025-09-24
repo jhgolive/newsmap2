@@ -348,6 +348,9 @@ window.onload = function() {
       map.setCenter(myMarkerEl?._latlng || map.getCenter());
       refreshAddressText();
       updateDistanceUnitOnResize();
+
+	  // ✅ 뉴스 영역도 같이 조정
+  	  document.getElementById("wrapper").style.width = `calc(100vw - ${data.mapSize}px)`;
     }
   });
 
@@ -536,7 +539,7 @@ loadNews();
     top: 0;         /* 화면 상단 */
     left: 0;
     transform: translateY(-8px); /* 강제 위치 조정 */
-    width: 100vw;
+    width: calc(100vw - 200px); /* 화면 전체 - 지도 너비 */
     height: 40px;
     z-index: 9999;     /* 다른 요소보다 위에 */
   }
